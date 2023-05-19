@@ -33,19 +33,47 @@ async function run() {
 
         const productCollection = client.db('heroHaven').collection('products');
 
+        // app.get('/products', async (req, res) => {
+        //     const cursor = productCollection.find();
+        //     const result = await cursor.toArray();
+        //     res.send(result);
+        // })
+
         app.get('/products', async (req, res) => {
-            const cursor = productCollection.find();
-            const result = await cursor.toArray();
+            console.log(req.query.email);
+            let query = {};
+            if (req.query?.email) {
+                query = { seller_email: req.query.email }
+            }
+            const result = await productCollection.find(query).toArray();
             res.send(result);
         })
 
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await productCollection.findOne(query);
             res.send(result);
         })
 
+        app.post('/toy', async (req, res) => {
+            const newToy = req.body;
+            console.log(newToy);
+            const result = await productCollection.insertOne(newToy);
+            res.send(result);
+        })
+
+        app.patch('/products/:id', async (req, res) => {
+            const updateToyDetails = req.body;
+            console.log(updateToyDetails);
+        })
+
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
 
