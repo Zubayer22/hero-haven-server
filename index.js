@@ -63,9 +63,42 @@ async function run() {
             res.send(result);
         })
 
-        app.patch('/products/:id', async (req, res) => {
+        // app.patch('/products/:id', async (req, res) => {
+        //     const productId = req.params.id;
+        //     const updateToyDetails = req.body;
+
+        //     try {
+        //         const result = await productCollection.updateOne(
+        //             { _id: new ObjectId(productId) },
+        //             { $set: updateToyDetails }
+        //         );
+
+        //         if (result.modifiedCount > 0) {
+        //             res.status(200).json({ message: 'Product details updated successfully' });
+        //         } else {
+        //             res.status(404).json({ error: 'Product not found' });
+        //         }
+        //     } catch (error) {
+        //         res.status(500).json({ error: 'Failed to update product details' });
+        //     }
+        // });
+
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
             const updateToyDetails = req.body;
-            console.log(updateToyDetails);
+            const toy = {
+                $set: {
+                    name: updateToyDetails.toy_name,
+                    price: updateToyDetails.price,
+                    picture_url: updateToyDetails.picture_url,
+                    available_quantity: updateToyDetails.available_quantity,
+                    description: updateToyDetails.description
+                }
+            }
+            const result = await productCollection.updateOne(filter, toy, options);
+            res.send(result)
         })
 
         app.delete('/products/:id', async (req, res) => {
