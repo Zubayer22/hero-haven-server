@@ -33,6 +33,25 @@ async function run() {
 
         const productCollection = client.db('heroHaven').collection('products');
 
+
+        const indexKeys = { name: 1, category: 1 };
+        const indexOptions = { name: "nameCategory" };
+
+        const result = await productCollection.createIndex(indexKeys, indexOptions);
+
+
+        app.get('/products-search/:text', async (req, res) => {
+            const searchText = req.params.text;
+            const result = await productCollection.find({
+                $or: [
+                    { name: { $regex: searchText, $options: "i" } },
+                    { category: { $regex: searchText, $options: "i" } }
+                ]
+            }).toArray();
+            res.send(result);
+        })
+
+
         // app.get('/products', async (req, res) => {
         //     const cursor = productCollection.find();
         //     const result = await cursor.toArray();
@@ -40,12 +59,12 @@ async function run() {
         // })
 
         app.get('/products', async (req, res) => {
-            console.log(req.query.email);
+            // console.log(req.query.email);
             let query = {};
             if (req.query?.email) {
                 query = { seller_email: req.query.email }
             }
-            const result = await productCollection.find(query).toArray();
+            const result = await productCollection.find(query).limit(20).toArray();
             res.send(result);
         })
 
@@ -58,7 +77,7 @@ async function run() {
 
         app.post('/toy', async (req, res) => {
             const newToy = req.body;
-            console.log(newToy);
+            // console.log(newToy);
             const result = await productCollection.insertOne(newToy);
             res.send(result);
         })
