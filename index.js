@@ -7,7 +7,12 @@ const port = process.env.PORT || 3000;
 
 
 //middleware
-app.use(cors());
+const corsOptions = {
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200,
+}
+app.use(cors(corsOptions))
 app.use(express.json());
 
 
@@ -21,14 +26,24 @@ const client = new MongoClient(uri, {
         version: ServerApiVersion.v1,
         strict: true,
         deprecationErrors: true,
-    }
+    },
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    maxPoolSize: 100
 });
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
 
+        // Connect the client to the server	(optional starting in v4.7)
+
+        // await client.connect();
+        client.connect((err) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+        })
 
 
         const productCollection = client.db('heroHaven').collection('products');
@@ -37,7 +52,7 @@ async function run() {
         const indexKeys = { name: 1, category: 1 };
         const indexOptions = { name: "nameCategory" };
 
-        const result = await productCollection.createIndex(indexKeys, indexOptions);
+        const result = productCollection.createIndex(indexKeys, indexOptions);
 
 
         app.get('/products-search/:text', async (req, res) => {
